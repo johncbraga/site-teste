@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- ================================
+       Metadados e Título
+  =================================== -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HLTV</title>
+
+  <!-- ================================
+       Bibliotecas (XLSX + Chart.js)
+  =================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- ================================
+       Fonte
+  =================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- ================================
+       Estilos (UI/UX refinado)
+  =================================== -->
+  <style>
+    /* ---------------------------------
+       Design Tokens (Cores, Raio, Sombras)
+    ---------------------------------- */
+    :root{
+      /* Tons base e gradientes de fundo */
+      --bg:#0a0f1e;
+      --bg-2:#0f172a;
+      --bg-gradient-1: radial-gradient(1200px 1200px at 10% -20%, rgba(56,189,248,0.13), transparent 40%);
+      --bg-gradient-2: radial-gradient(1200px 1200px at 110% 10%, rgba(167,139,250,0.13), transparent 40%);
+      --bg-gradient-3: linear-gradient(180deg, #070b17, var(--bg));
+
+      /* Superfícies / vidro */
+      --glass: rgba(17,24,39,0.60);
+      --glass-2: rgba(17,24,39,0.45);
+      --card: rgba(11,19,40,0.80);
+
+      /* Bordas e sombras */
+      --border: rgba(148,163,184,0.18);
+      --border-strong: rgba(148,163,184,0.28);
+      --shadow-lg: 0 18px 40px rgba(2,6,23,0.55);
+      --shadow-md: 0 10px 26px rgba(2,6,23,0.45);
+      --ring: 0 0 0 2px rgba(56,189,248,0.35);
+
+      /* Texto */
+      --text:#e5e7eb;
+      --muted:#a7b0c0;
+      --muted-2:#94a3b8;
+
+      /* Acentos */
+      --accent:#60a5fa;
+      --accent-2:#38bdf8;
+      --accent-3:#a78bfa;
+      --success:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+
+      /* Metais */
+      --gold:#facc15;
+      --silver:#cbd5e1;
+      --bronze:#d97706;
+
+      /* Raio e transições */
+      --radius:14px;
+      --radius-sm:10px;
+      --radius-lg:18px;
+      --transition: .22s ease;
+    }
+
+    /* ---------------------------------
+       Reset e Base
+    ---------------------------------- */
+    *{ box-sizing: border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3);
+      color:var(--text);
+      padding:24px;
+      line-height: 1.45;
+    }
+
+    /* ---------------------------------
+       Header
+    ---------------------------------- */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:22px;
+    }
+    .title{ display:flex; align-items:center; gap:14px }
+    .logo{
+      width:42px; height:42px; border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, #93c5fd, #3b82f6 60%, #1d4ed8);
+      box-shadow: 0 10px 24px rgba(59,130,246,0.45), inset 0 0 18px rgba(255,255,255,0.10);
+    }
+    h1{
+      margin:0;
+      font-size: clamp(22px, 3vw, 30px);
+      letter-spacing:.2px;
+      font-weight: 800;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    .hstack{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+
+    /* ---------------------------------
+       Cards e Grid Principal
+    ---------------------------------- */
+    .grid{
+      display:grid;
+      grid-template-columns: 2.1fr 1.2fr;
+      gap:18px;
+    }
+    @media (max-width: 1100px){
+      .grid{ grid-template-columns:1fr }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.00)), var(--glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(8px);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-strong);
+    }
+
+    .card-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      padding-bottom:6px;
+      border-bottom: 1px dashed rgba(148,163,184,0.15);
+    }
+    .card h3{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      font-weight:700;
+    }
+
+    /* ---------------------------------
+       Controles (Filtros)
+    ---------------------------------- */
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin: 12px 0 16px 0;
+    }
+    .input, select{
+      background: rgba(2,6,23,0.66);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding:10px 12px;
+      outline:none;
+      transition: var(--transition);
+      font-size:14px;
+      min-height: 38px;
+    }
+    .input:hover, select:hover{
+      border-color: var(--border-strong);
+      background: rgba(2,6,23,0.72);
+    }
+    .input:focus, select:focus{
+      box-shadow: var(--ring);
+      border-color:#38bdf8;
+      background: rgba(2,6,23,0.78);
+    }
+    input[type="file"]{
+      background:rgba(2,6,23,0.35);
+      border:1px dashed var(--border);
+      padding:10px 12px;
+      border-radius: var(--radius-sm);
+      cursor:pointer;
+    }
+
+    /* ---------------------------------
+       Canvas (Tamanho padrão)
+    ---------------------------------- */
+    canvas{
+      width:100% !important;
+      height:300px !important;
+    }
+
+    /* Mini-grid para os gráficos fixos por região */
+    .mini-grid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:14px;
+    }
+    @media (max-width: 900px){
+      .mini-grid{ grid-template-columns: 1fr; }
+    }
+    .mini-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00)), var(--glass-2);
+      border:1px solid rgba(148,163,184,0.14);
+      border-radius:12px;
+      padding:12px;
+      transition: var(--transition);
+    }
+    .mini-card:hover{
+      border-color: var(--border-strong);
+    }
+    .mini-card h4{
+      margin:0 0 10px;
+      font-size:14px;
+      color:#cbd5e1;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .mini-card canvas{
+      height:260px !important;
+    }
+
+    /* ---------------------------------
+       Tabela
+    ---------------------------------- */
+    .table-container{
+      max-height:460px;
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,0.15);
+      background: rgba(2,6,23,0.35);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:rgba(2,6,23,0.40);
+    }
+    thead th{
+      position:sticky; top:0; z-index:2;
+      background: linear-gradient(180deg, rgba(2,6,23,0.90), rgba(2,6,23,0.75));
+      border-bottom:1px solid rgba(148,163,184,0.25);
+      color:#cbd5e1;
+      font-weight:700;
+      font-size:12.5px;
+      letter-spacing:.25px;
+      text-transform: uppercase;
+    }
+    th,td{
+      padding:10px 12px;
+      font-size:13px;
+      text-align:center;
+      white-space:nowrap;
+    }
+    tbody tr:nth-child(even):not(.legend-gold):not(.legend-silver):not(.legend-bronze):not(.legend-other){
+      background: rgba(255,255,255,0.02);
+    }
+    tbody tr:hover{
+      background: rgba(56,189,248,0.10);
+      transition:.15s ease;
+    }
+    .table-bordered td{
+      border-top:1px solid rgba(148,163,184,0.10);
+    }
+
+    /* Badges para Region na tabela */
+    .badge{
+      padding:4px 8px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:11px;
+      letter-spacing:.3px;
+      display:inline-block;
+    }
+    .badge-am{
+      background: rgba(34,197,94,0.18);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,0.40);
+    }
+    .badge-eu{
+      background: rgba(56,189,248,0.18);
+      color:#7dd3fc;
+      border:1px solid rgba(56,189,248,0.40);
+    }
+    .badge-as{
+      background: rgba(167,139,250,0.18);
+      color:#c4b5fd;
+      border:1px solid rgba(167,139,250,0.40);
+    }
+
+    /* Legends table */
+    .legend-gold   { background: var(--gold) !important; color:#1f2937; border:2px solid #ef4444 }
+    .legend-silver { background: var(--silver) !important; color:#111827; border:2px solid #ef4444 }
+    .legend-bronze { background: var(--bronze) !important; color:#111827; border:2px solid #ef4444 }
+    .legend-other  { background: #7f1d1d !important; color:#f3f4f6; border:2px solid #ef4444 }
+
+    /* ---------------------------------
+       Estados (Empty/Loading)
+    ---------------------------------- */
+    .state{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      padding:22px;
+      font-size:14px;
+      border:1px dashed rgba(148,163,184,0.25);
+      border-radius:12px;
+      background: rgba(2,6,23,0.35);
+      gap:8px;
+    }
+    .spinner{
+      width:16px; height:16px;
+      border:3px solid rgba(148,163,184,0.35);
+      border-top-color:#38bdf8;
+      border-radius:50%;
+      display:inline-block;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin{ to { transform: rotate(360deg) } }
+
+    /* ---------------------------------
+       Footer
+    ---------------------------------- */
+    .footer{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+      opacity:.9;
+    }
+    .footer a{ color:#93c5fd; text-decoration:none }
+    .footer a:hover{ text-decoration:underline }
+
+    /* ---------------------------------
+       Destaques pedidos
+    ---------------------------------- */
+    .gold-name {
+      color: var(--gold) !important;
+      font-weight: 800 !important;
+      text-shadow: 0 0 6px rgba(250,204,21,0.35);
+    }
+    .metric-highlight {
+      background: rgba(250,204,21,0.12) !important;
+      color: var(--gold) !important;
+      font-weight: 700;
+    }
+
+    /* ---------------------------------
+       Ajustes específicos pizza
+    ---------------------------------- */
+    #teamPieChart{
+      height: 320px !important;
+    }
+    #teamPieWrap .state{
+      min-height: 320px;
+    }
+
+    /* Espaçamento extra abaixo do Top 10 para o bloco da pizza */
+    .top10-bottom{
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================
+       Header
+  ============================================ -->
+  <div class="header">
+    <div class="title">
+      <div class="logo"></div>
+      <div>
+        <h1>Team's Ranking Dashboard</h1>
+        <div class="subtitle">Visual moderno • Filtros rápidos • Leituras claras</div>
+      </div>
+    </div>
+    <div class="hstack">
+      <label for="excelFile" class="sr-only"></label>
+      <input type="file" id="excelFile" accept=".xlsx,.xls">
+    </div>
+  </div>
+
+  <!-- =========================================
+       Controles / Filtros
+  ============================================ -->
+  <div class="controls">
+    <select id="regionFilter" title="Região">
+      <option value="Global">Global</option>
+      <option value="EU">Europa</option>
+      <option value="AS/SIS/ESEA">Asia</option>
+      <option value="AM">Americas</option>
+    </select>
+
+    <input class="input" type="text" id="teamSearch" placeholder="Buscar time (digite para filtrar)">
+
+    <select id="metric" title="Métrica">
+      <option value="Points">Points</option>
+      <option value="Victories">Victories</option>
+      <option value="Streak">Streak</option>
+      <option value="Loses">Loses</option>
+      <option value="Majors">Majors</option>
+      <option value="Prestige">Prestige</option>
+      <option value="Sazonal Prestige">Sazonal Prestige</option>
+      <option value="Tier">Tier</option>
+    </select>
+
+    <select id="sortOrder" title="Ordem">
+      <option value="desc">Maior → Menor</option>
+      <option value="asc">Menor → Maior</option>
+    </select>
+  </div>
+
+  <!-- =========================================
+       Grid Principal
+  ============================================ -->
+  <div class="grid">
+
+    <!-- =======================
+         Comparação + Tabela
+    ======================== -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Comparação entre Regiões</h3>
+        <div style="color:var(--muted);font-size:12px">média por métrica</div>
+      </div>
+      <div id="regionChartWrap">
+        <div class="state" id="regionChartState"><span class="spinner"></span>Carregando…</div>
+        <canvas id="regionChart" style="display:none"></canvas>
+      </div>
+
+      <div class="card-header" style="margin-top:14px">
+        <h3>Tabela Geral</h3>
+        <div style="color:var(--muted);font-size:12px">ordenada pela métrica</div>
+      </div>
+      <div class="table-container" id="dataTableWrap">
+        <div class="state" id="dataTableState">Carregue um arquivo Excel para visualizar os dados.</div>
+        <table id="dataTable" class="table-bordered" style="display:none"></table>
+      </div>
+    </div>
+
+    <!-- =======================
+         Top 10 (normal) com Pizza embaixo (mesmo card)
+    ======================== -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Top 10 Times</h3>
+        <div style="color:var(--muted);font-size:12px">com base na métrica selecionada</div>
+      </div>
+
+      <!-- Top 10 normal -->
+      <div id="topChartWrap">
+        <div class="state" id="topChartState"><span class="spinner"></span>Carregando…</div>
+        <canvas id="topChart" style="display:none"></canvas>
+      </div>
+
+      <!-- Pizza abaixo do Top 10 (usa o espaço vazio do card) -->
+      <div class="top10-bottom">
+        <div class="mini-card" id="teamPieCard" style="height:100%">
+          <div class="card-header" style="margin-bottom:8px; padding-bottom:6px">
+            <h3 style="margin:0;font-size:14px">Vitórias x Derrotas — Por Time</h3>
+            <div class="hstack" style="margin-left:auto; gap:8px">
+              <label for="teamPieSelect" style="color:var(--muted);font-size:12px">Time</label>
+              <select id="teamPieSelect" title="Time para pizza" style="min-width:180px"></select>
+            </div>
+          </div>
+
+          <div id="teamPieWrap">
+            <div class="state" id="teamPieState"><span class="spinner"></span>Carregando…</div>
+            <canvas id="teamPieChart" style="display:none;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================
+         Gráficos fixos por região
+    ============================================ -->
+    <div class="card" style="grid-column:1 / -1">
+      <div class="card-header">
+        <h3>Gráficos Fixos por Região Selecionada</h3>
+        <div style="color:var(--muted);font-size:12px">ignoram a busca e demais filtros</div>
+      </div>
+
+      <div class="mini-grid">
+        <!-- Streak -->
+        <div class="mini-card">
+          <h4>Streak — Top 10 (apenas região)</h4>
+          <div id="streakChartWrap">
+            <div class="state" id="streakChartState"><span class="spinner"></span>Carregando…</div>
+            <canvas id="streakChart" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Victories -->
+        <div class="mini-card">
+          <h4>Victories — Top 10 (apenas região)</h4>
+          <div id="victoriesChartWrap">
+            <div class="state" id="victoriesChartState"><span class="spinner"></span>Carregando…</div>
+            <canvas id="victoriesChart" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Prestige (antes Points) -->
+        <div class="mini-card">
+          <h4>Prestige — Top 10 (apenas região)</h4>
+          <div id="pointsChartWrap">
+            <div class="state" id="pointsChartState"><span class="spinner"></span>Carregando…</div>
+            <canvas id="pointsChart" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Majors AGORA no lugar onde ficava o Points -->
+        <div class="mini-card">
+          <h4>Comparação (Linha) — Majors por Time (apenas região)</h4>
+          <div id="majorsChartWrap">
+            <div class="state" id="majorsChartState"><span class="spinner"></span>Carregando…</div>
+            <canvas id="majorsChart" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Points AGORA ocupa a linha inteira -->
+        <div class="mini-card" style="grid-column:1 / -1">
+          <h4>Comparação (Linha) — Points por Time (apenas região)</h4>
+          <div id="comparisonChartWrap">
+            <div class="state" id="comparisonChartState"><span class="spinner"></span>Carregando…</div>
+            <canvas id="comparisonChart" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =======================
+         Legends
+    ======================== -->
+    <div class="card" style="grid-column:1 / -1">
+      <div class="card-header">
+        <h3>Legends Ranking (501+ Points)</h3>
+        <select id="legendsRegionFilter" title="Região Legends">
+          <option value="Global">Global</option>
+          <option value="AM">Americas</option>
+          <option value="EU">Europa</option>
+          <option value="AS/SIS/ESEA">Asia</option>
+        </select>
+      </div>
+      <div class="table-container" id="legendsTableWrap">
+        <div class="state" id="legendsTableState">Carregue um arquivo para ver o ranking de Legends.</div>
+        <table id="legendsTable" class="table-bordered" style="display:none"></table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================================
+       Footer
+  ============================================ -->
+  <div class="footer">
+    Feito com ❤️ para leitura rápida e clara. Dica: use a busca para filtrar por time imediatamente.
+  </div>
+
+  <!-- =========================================
+       Scripts (JS) — Lógica mantida 100%
+       + total de partidas na pizza
+  ============================================ -->
+  <script>
+    /* ===========================
+       Estado Global
+    ============================ */
+    let headers = [];
+    let rows = [];
+    let regionChart, topChart;
+
+    // Gráficos fixos por região
+    let streakChart, victoriesChart, pointsChart, comparisonChart, majorsChart;
+
+    // Pizza por time
+    let teamPieChart = null;
+
+    let searchTimer = null;
+
+    /* ===========================
+       Eventos
+    ============================ */
+    document.getElementById('excelFile').addEventListener('change', loadExcel);
+
+    ['regionFilter','metric','sortOrder'].forEach(id => {
+      document.getElementById(id).addEventListener('change', update);
+    });
+
+    // Debounce na busca
+    document.getElementById('teamSearch').addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(update, 250);
+    });
+
+    document.getElementById("legendsRegionFilter").addEventListener("change", update);
+
+    // Evento do seletor de time (pizza)
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.id === 'teamPieSelect'){
+        renderTeamPie();
+      }
+    });
+
+    /* ===========================
+       Leitura Excel
+    ============================ */
+    function loadExcel(e){
+      const file = e.target.files?.[0];
+      if(!file) return;
+
+      setLoading(true);
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try{
+          const wb = XLSX.read(new Uint8Array(evt.target.result), { type:'array' });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+          headers = (data[0] || []).map(h => (h ?? '').toString());
+          rows = data.slice(1);
+
+          update();
+        }catch(err){
+          console.error(err);
+          setError("Erro ao ler o arquivo. Verifique o formato e tente novamente.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    /* ===========================
+       UI Helpers
+    ============================ */
+    function setLoading(isLoading){
+      const regionState = document.getElementById('regionChartState');
+      const topState = document.getElementById('topChartState');
+      const dataState = document.getElementById('dataTableState');
+      const legendsState = document.getElementById('legendsTableState');
+
+      // Estados dos gráficos fixos
+      const streakState = document.getElementById('streakChartState');
+      const victoriesState = document.getElementById('victoriesChartState');
+      const pointsState = document.getElementById('pointsChartState');
+      const comparisonState = document.getElementById('comparisonChartState');
+      const majorsState = document.getElementById('majorsChartState');
+
+      // Pizza
+      const teamPieState = document.getElementById('teamPieState');
+
+      [regionState, topState, dataState, legendsState, streakState, victoriesState, pointsState, comparisonState, majorsState, teamPieState]
+        .forEach(el => { if(el) el.style.display = isLoading ? 'flex':'none' });
+
+      ['regionChart','topChart','dataTable','legendsTable','streakChart','victoriesChart','pointsChart','comparisonChart','majorsChart','teamPieChart']
+        .forEach(id => {
+          const el = document.getElementById(id);
+          if(el) el.style.display = isLoading ? 'none':'';
+        });
+    }
+
+    function setError(msg){
+      ['regionChartState','topChartState','dataTableState','legendsTableState','streakChartState','victoriesChartState','pointsChartState','comparisonChartState','majorsChartState','teamPieState'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el){ el.innerHTML = msg; el.style.display = 'flex'; }
+      });
+      ['regionChart','topChart','dataTable','legendsTable','streakChart','victoriesChart','pointsChart','comparisonChart','majorsChart','teamPieChart'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+      });
+    }
+
+    /* ===========================
+       Update principal
+    ============================ */
+    function update(){
+      if(!headers.length || !rows.length){
+        setLoading(false);
+        setError("Carregue um arquivo Excel para visualizar os dados.");
+        return;
+      }
+
+      const region = document.getElementById('regionFilter').value;
+      const search = (document.getElementById('teamSearch').value || '').toLowerCase();
+      const metric = document.getElementById('metric').value;
+      const order = document.getElementById('sortOrder').value;
+
+      const idxTeam   = headers.indexOf("Team");
+      const idxRegion = headers.indexOf("Region");
+      const idxMetric = headers.indexOf(metric);
+      const idxPoints = headers.indexOf("Points");
+
+      // guarda dados por região para a média
+      const regions = { "AM": [], "EU": [], "AS/SIS/ESEA": [] };
+
+      rows.forEach(r => {
+        const team = (r[idxTeam] || "").toString().toLowerCase();
+        if (search && !team.includes(search)) return;
+        const reg = r[idxRegion];
+        const val = num(r[idxMetric]);
+        if(regions[reg] !== undefined){
+          regions[reg].push(val);
+        }
+      });
+
+      // Chart de regiões
+      renderRegionChart(
+        ["Americas", "Europa", "Asia"],
+        [avg(regions["AM"]), avg(regions["EU"]), avg(regions["AS/SIS/ESEA"])],
+        metric
+      );
+
+      // Filtragem e ordenação da tabela + Top10
+      let filtered = rows.filter(r => {
+        const team = (r[idxTeam] || "").toString().toLowerCase();
+        const regionOk = (region === "Global" || r[idxRegion] === region);
+        const searchOk = (!search || team.includes(search));
+        return regionOk && searchOk;
+      });
+
+      filtered.sort((a,b) =>
+        order === "asc"
+          ? (num(a[idxMetric]) - num(b[idxMetric]))
+          : (num(b[idxMetric]) - num(a[idxMetric]))
+      );
+
+      renderTable(filtered, idxRegion);
+      renderTopChart(filtered.slice(0,10), idxTeam, idxMetric, metric);
+
+      // Legends
+      const legendsRegion = document.getElementById("legendsRegionFilter").value;
+      const legends = rows
+        .filter(r => {
+          const points = num(r[idxPoints]);
+          const regionMatch = (legendsRegion === "Global" || r[idxRegion] === legendsRegion);
+          return points > 501 && regionMatch;
+        })
+        .sort((a,b) => num(b[idxPoints]) - num(a[idxPoints]));
+
+      renderLegendsTable(legends, idxTeam, idxPoints);
+
+      // Gráficos fixos por Região
+      renderRegionFixedCharts();
+
+      // Preenche seletor de time (pizza) e renderiza
+      populateTeamPieSelect();
+      renderTeamPie();
+
+      // Mostrar UI
+      document.getElementById('regionChartState').style.display = 'none';
+      document.getElementById('topChartState').style.display = 'none';
+      document.getElementById('dataTableState').style.display = filtered.length ? 'none' : 'flex';
+      document.getElementById('legendsTableState').style.display = legends.length ? 'none' : 'flex';
+
+      document.getElementById('regionChart').style.display = 'block';
+      document.getElementById('topChart').style.display = 'block';
+      document.getElementById('dataTable').style.display = filtered.length ? 'table' : 'none';
+      document.getElementById('legendsTable').style.display = legends.length ? 'table' : 'none';
+    }
+
+    /* ===========================
+       Utils
+    ============================ */
+    function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+    function num(v){ const n = Number(v); return isNaN(n) ? 0 : n; }
+
+    /* ===========================
+       Charts (config base)
+    ============================ */
+    function baseChartOptions(title){
+      return {
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{ display:false },
+          tooltip:{
+            backgroundColor:'rgba(2,6,23,0.96)',
+            titleColor:'#e5e7eb',
+            bodyColor:'#cbd5e1',
+            borderColor:'rgba(148,163,184,0.25)',
+            borderWidth:1,
+            padding:10
+          },
+          title:{
+            display:false, text:title, color:'#e5e7eb', font:{weight:'700', size:14}
+          }
+        },
+        layout:{ padding:6 },
+        animation:{ duration:320 },
+        scales:{
+          x:{
+            ticks:{ color:'#cbd5e1', font:{ size:12 } },
+            grid:{ color:'rgba(148,163,184,0.12)' }
+          },
+          y:{
+            ticks:{ color:'#cbd5e1', font:{ size:12 }, precision:0 },
+            grid:{ color:'rgba(148,163,184,0.10)' },
+            beginAtZero:true
+          }
+        }
+      }
+    }
+
+    function renderRegionChart(labels, values, metric){
+      const ctx = document.getElementById('regionChart').getContext('2d');
+      if(regionChart) regionChart.destroy();
+
+      regionChart = new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels,
+          datasets:[{
+            label:`Média de ${metric}`,
+            data: values.map(v => Number(v.toFixed(2))),
+            backgroundColor: [ '#22c55e', '#38bdf8', '#a78bfa' ],
+            borderColor: [ '#16a34a', '#0891b2', '#7c3aed' ],
+            borderWidth:1.5,
+            borderRadius:8,
+            maxBarThickness: 38
+          }]
+        },
+        options: baseChartOptions()
+      });
+    }
+
+    function renderTopChart(data, teamIdx, valIdx, metric){
+      const ctx = document.getElementById('topChart').getContext('2d');
+      if(topChart) topChart.destroy();
+
+      topChart = new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels: data.map(r => r[teamIdx]),
+          datasets:[{
+            label: metric,
+            data: data.map(r => num(r[valIdx])),
+            backgroundColor: data.map(()=> createBarGradient(ctx)),
+            borderColor: '#facc15',
+            borderWidth:1.2,
+            borderRadius:8,
+            maxBarThickness: 42
+          }]
+        },
+        options: {
+          ...baseChartOptions(),
+          scales:{
+            x:{ ticks:{ color:'#cbd5e1', font:{size:11} }, grid:{ display:false } },
+            y:{ ticks:{ color:'#cbd5e1', font:{size:12} }, grid:{ color:'rgba(148,163,184,0.10)' }, beginAtZero:true }
+          }
+        }
+      });
+    }
+
+    function createBarGradient(ctx){
+      const gradient = ctx.createLinearGradient(0,0,0,280);
+      gradient.addColorStop(0, 'rgba(250,204,21,0.95)');
+      gradient.addColorStop(1, 'rgba(202,138,4,0.90)');
+      return gradient;
+    }
+
+    /* ===========================
+       Tabela
+    ============================ */
+    function renderTable(data, idxRegion){
+      const metric = document.getElementById("metric").value;
+      const idxMetric = headers.indexOf(metric);
+      const idxTeam = headers.indexOf("Team");
+
+      let html = "<thead><tr>";
+      headers.forEach(h => html += `<th>${escapeHtml(h)}</th>`);
+      html += "</tr></thead><tbody>";
+
+      const topFiveTeams = data.slice(0, 5).map(r => r[idxTeam]?.toString());
+
+      data.forEach(r => {
+        html += "<tr>";
+        headers.forEach((h, i) => {
+          let cell = r[i] ?? "";
+          let cls = "";
+
+          if (i === idxMetric) cls = "metric-highlight";
+          if (i === idxTeam && topFiveTeams.includes(r[idxTeam]?.toString())) {
+            cls = (cls + " gold-name").trim();
+          }
+
+          if (i === idxRegion) {
+            const region = (cell || "").toString();
+            const badgeClass =
+              region === "AM" ? "badge-am" :
+              region === "EU" ? "badge-eu" :
+              region === "AS/SIS/ESEA" ? "badge-as" : "";
+            cell = badgeClass
+              ? `<span class="badge ${badgeClass}">${escapeHtml(region)}</span>`
+              : escapeHtml(region);
+          } else {
+            cell = escapeHtml(cell);
+          }
+
+          html += `<td class="${cls}">${cell}</td>`;
+        });
+        html += "</tr>";
+      });
+
+      html += "</tbody>";
+      document.getElementById('dataTable').innerHTML = html;
+    }
+
+    function renderLegendsTable(data, teamIdx, pointsIdx){
+      let html = `
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Team</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+
+      data.forEach((r,i) => {
+        let cls = "legend-other";
+        if (i === 0) cls = "legend-gold";
+        else if (i === 1) cls = "legend-silver";
+        else if (i === 2) cls = "legend-bronze";
+
+        html += `
+          <tr class="${cls}">
+            <td>${i+1}</td>
+            <td>${escapeHtml(r[teamIdx])}</td>
+            <td>${escapeHtml(r[pointsIdx])}</td>
+          </tr>
+        `;
+      });
+
+      html += "</tbody>";
+      document.getElementById('legendsTable').innerHTML = html;
+    }
+
+    /* ===========================
+       Segurança HTML
+    ============================ */
+    function escapeHtml(v){
+      return (v ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    /* ===========================
+       Gráficos fixos por região
+    ============================ */
+    function renderRegionFixedCharts(){
+      if(!headers.length || !rows.length) return;
+
+      const region = document.getElementById('regionFilter').value;
+      const idxTeam    = headers.indexOf("Team");
+      const idxRegion  = headers.indexOf("Region");
+      const idxPrestige= headers.indexOf("Prestige");
+      const idxVict    = headers.indexOf("Victories");
+      const idxStreak  = headers.indexOf("Streak");
+      const idxPoints  = headers.indexOf("Points");
+      const idxMajors  = headers.indexOf("Majors");
+
+      const hasTeam = idxTeam >= 0, hasRegion = idxRegion >= 0;
+      if(!hasTeam || !hasRegion) {
+        setError("Colunas obrigatórias ausentes (Team/Region).");
+        return;
+      }
+
+      const regionOnly = rows.filter(r => region === "Global" || r[idxRegion] === region);
+
+      // Streak — Top 10
+      if(idxStreak >= 0){
+        const topStreak = [...regionOnly].sort((a,b) => num(b[idxStreak]) - num(a[idxStreak])).slice(0,10);
+        renderMetricBarChart('streakChart', topStreak.map(r => r[idxTeam]), topStreak.map(r => num(r[idxStreak])),
+          { bg:'rgba(167,139,250,0.85)', border:'#7c3aed' });
+        toggleState('streakChart', true);
+      }else{
+        showStateMsg('streakChart', "Coluna 'Streak' não encontrada.");
+      }
+
+      // Victories — Top 10
+      if(idxVict >= 0){
+        const topVict = [...regionOnly].sort((a,b) => num(b[idxVict]) - num(a[idxVict])).slice(0,10);
+        renderMetricBarChart('victoriesChart', topVict.map(r => r[idxTeam]), topVict.map(r => num(r[idxVict])),
+          { bg:'rgba(34,197,94,0.85)', border:'#16a34a' });
+        toggleState('victoriesChart', true);
+      }else{
+        showStateMsg('victoriesChart', "Coluna 'Victories' não encontrada.");
+      }
+
+      // Prestige — Top 10 (canvas mantém id "pointsChart")
+      if(idxPrestige >= 0){
+        const topPrestige = [...regionOnly].sort((a,b) => num(b[idxPrestige]) - num(a[idxPrestige])).slice(0,10);
+        renderMetricBarChart('pointsChart', topPrestige.map(r => r[idxTeam]), topPrestige.map(r => num(r[idxPrestige])),
+          { bg:'rgba(250,204,21,0.92)', border:'#ca8a04' });
+        toggleState('pointsChart', true);
+      }else{
+        showStateMsg('pointsChart', "Coluna 'Prestige' não encontrada.");
+      }
+
+      // Linha — Points (Top 20)
+      if(idxPoints >= 0){
+        const top20 = [...regionOnly].sort((a,b) => num(b[idxPoints]) - num(a[idxPoints])).slice(0, Math.min(20, regionOnly.length));
+        renderLineComparison('comparisonChart', top20.map(r => r[idxTeam]), top20.map(r => num(r[idxPoints])),
+          { line:'#38bdf8', fill:'rgba(56,189,248,0.15)', point:'#7dd3fc' });
+        toggleState('comparisonChart', true);
+      }else{
+        showStateMsg('comparisonChart', "Coluna 'Points' não encontrada.");
+      }
+
+      // Linha — Majors (Top 20)
+      if(idxMajors >= 0){
+        const top20Majors = [...regionOnly].sort((a,b) => num(b[idxMajors]) - num(a[idxMajors])).slice(0, Math.min(20, regionOnly.length));
+        renderLineComparison('majorsChart', top20Majors.map(r => r[idxTeam]), top20Majors.map(r => num(r[idxMajors])),
+          { line:'#f97316', fill:'rgba(249,115,22,0.15)', point:'#fb923c' });
+        toggleState('majorsChart', true);
+      }else{
+        showStateMsg('majorsChart', "Coluna 'Majors' não encontrada.");
+      }
+    }
+
+    // Estado helper
+    function toggleState(chartId, ok){
+      const stateId = chartId + 'State';
+      const canvas = document.getElementById(chartId);
+      const state = document.getElementById(stateId);
+      if(state) state.style.display = ok ? 'none' : 'flex';
+      if(canvas) canvas.style.display = ok ? 'block' : 'none';
+    }
+    function showStateMsg(chartId, msg){
+      const state = document.getElementById(chartId + 'State');
+      const canvas = document.getElementById(chartId);
+      if(state){ state.textContent = msg; state.style.display = 'flex'; }
+      if(canvas){ canvas.style.display = 'none'; }
+    }
+
+    // Barras genérico
+    function renderMetricBarChart(canvasId, labels, values, colors){
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if(canvasId === 'streakChart' && streakChart) { streakChart.destroy(); }
+      if(canvasId === 'victoriesChart' && victoriesChart) { victoriesChart.destroy(); }
+      if(canvasId === 'pointsChart' && pointsChart) { pointsChart.destroy(); }
+
+      const chart = new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels,
+          datasets:[{
+            label: '',
+            data: values,
+            backgroundColor: colors.bg,
+            borderColor: colors.border,
+            borderWidth:1.2,
+            borderRadius:8,
+            maxBarThickness: 48
+          }]
+        },
+        options:{
+          ...baseChartOptions(),
+          scales:{
+            x:{ ticks:{ color:'#cbd5e1', font:{ size:11 } }, grid:{ display:false } },
+            y:{ ticks:{ color:'#cbd5e1', font:{ size:12 }, precision:0 }, grid:{ color:'rgba(148,163,184,0.10)' }, beginAtZero:true }
+          }
+        }
+      });
+
+      if(canvasId === 'streakChart') streakChart = chart;
+      if(canvasId === 'victoriesChart') victoriesChart = chart;
+      if(canvasId === 'pointsChart') pointsChart = chart;
+    }
+
+    // Linha genérico
+    function renderLineComparison(canvasId, labels, values, colors){
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if(canvasId === 'comparisonChart' && comparisonChart) comparisonChart.destroy();
+      if(canvasId === 'majorsChart' && majorsChart) majorsChart.destroy();
+
+      const chart = new Chart(ctx, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[{
+            label: (canvasId === 'majorsChart') ? 'Majors' : 'Points',
+            data: values,
+            borderColor: colors.line,
+            pointBackgroundColor: colors.point,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            tension: 0.26,
+            fill: true,
+            backgroundColor: colors.fill,
+            borderWidth: 2
+          }]
+        },
+        options:{
+          ...baseChartOptions(),
+          plugins:{
+            ...baseChartOptions().plugins,
+            legend:{ display:true, labels:{ color:'#cbd5e1', font:{ weight:600 } } }
+          },
+          scales:{
+            x:{ ticks:{ color:'#cbd5e1', font:{ size:11 } }, grid:{ display:false } },
+            y:{ ticks:{ color:'#cbd5e1', font:{ size:12 }, precision:0 }, grid:{ color:'rgba(148,163,184,0.10)' }, beginAtZero:true }
+          }
+        }
+      });
+
+      if(canvasId === 'comparisonChart') comparisonChart = chart;
+      if(canvasId === 'majorsChart') majorsChart = chart;
+    }
+
+    /* ===========================
+       Pizza por time
+       (com "Total de partidas" no canto superior direito)
+    ============================ */
+    function populateTeamPieSelect(){
+      const select = document.getElementById('teamPieSelect');
+      if(!select) return;
+
+      const idxTeam = headers.indexOf("Team");
+      if(idxTeam < 0){
+        document.getElementById('teamPieState').textContent = "Coluna 'Team' não encontrada.";
+        return;
+      }
+
+      const teams = Array.from(new Set(rows.map(r => (r[idxTeam] ?? '').toString()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+      const current = select.value;
+
+      if(select.options.length !== teams.length + 1){
+        select.innerHTML = `<option value="">Selecione um time…</option>` + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      }
+
+      if(current && teams.includes(current)){
+        select.value = current;
+      }else{
+        select.value = "";
+      }
+    }
+
+    function renderTeamPie(){
+      const select = document.getElementById('teamPieSelect');
+      const state = document.getElementById('teamPieState');
+      const canvas = document.getElementById('teamPieChart');
+
+      if(!select || !state || !canvas) return;
+
+      const idxTeam = headers.indexOf("Team");
+      const idxVict = headers.indexOf("Victories");
+      const idxLose = headers.indexOf("Loses");
+
+      if(idxTeam < 0){ state.textContent = "Coluna 'Team' não encontrada."; state.style.display='flex'; canvas.style.display='none'; return; }
+      if(idxVict < 0 || idxLose < 0){
+        state.textContent = "Colunas 'Victories' e/ou 'Loses' não encontradas.";
+        state.style.display='flex'; canvas.style.display='none';
+        return;
+      }
+
+      const team = select.value;
+      if(!team){
+        state.innerHTML = "Selecione um time para visualizar.";
+        state.style.display='flex';
+        canvas.style.display='none';
+        return;
+      }
+
+      const row = rows.find(r => (r[idxTeam] ?? '').toString() === team);
+      if(!row){
+        state.textContent = "Time não encontrado nos dados.";
+        state.style.display='flex'; canvas.style.display='none';
+        return;
+      }
+
+      const victories = num(row[idxVict]);
+      const loses = num(row[idxLose]);
+
+      if(victories === 0 && loses === 0){
+        state.textContent = "Sem dados de vitórias/derrotas para este time.";
+        state.style.display='flex'; canvas.style.display='none';
+        return;
+      }
+
+      if(teamPieChart) teamPieChart.destroy();
+
+      const total = victories + loses;
+
+      // Plugin para exibir o "Total de partidas" no canto superior direito do gráfico
+      const totalBoxPlugin = {
+        id: 'totalBox',
+        afterDraw(chart) {
+          const {ctx, chartArea} = chart;
+          if(!chartArea) return;
+
+          const paddingX = 8;
+          const paddingY = 6;
+          const radius = 8;
+          const text = `Total de partidas: ${total}`;
+          ctx.save();
+          ctx.font = '600 12px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+          const textMetrics = ctx.measureText(text);
+          const textWidth = textMetrics.width;
+          const textHeight = 14; // aproximação
+
+          const boxWidth = textWidth + paddingX * 2;
+          const boxHeight = textHeight + paddingY * 2;
+          const x = chartArea.right - boxWidth - 8;  // margem interna
+          const y = chartArea.top + 8;
+
+          // Caixa com estilo "glass"
+          ctx.fillStyle = 'rgba(2,6,23,0.65)';
+          ctx.strokeStyle = 'rgba(56,189,248,0.35)';
+          ctx.lineWidth = 1;
+
+          const r = radius;
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.lineTo(x + boxWidth - r, y);
+          ctx.quadraticCurveTo(x + boxWidth, y, x + boxWidth, y + r);
+          ctx.lineTo(x + boxWidth, y + boxHeight - r);
+          ctx.quadraticCurveTo(x + boxWidth, y + boxHeight, x + boxWidth - r, y + boxHeight);
+          ctx.lineTo(x + r, y + boxHeight);
+          ctx.quadraticCurveTo(x, y + boxHeight, x, y + boxHeight - r);
+          ctx.lineTo(x, y + r);
+          ctx.quadraticCurveTo(x, y, x + r, y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Texto
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText(text, x + paddingX, y + paddingY + textHeight - 3);
+          ctx.restore();
+        }
+      };
+
+      const ctx = canvas.getContext('2d');
+      teamPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Victories', 'Loses'],
+          datasets: [{
+            data: [victories, loses],
+            backgroundColor: ['#22c55e', '#ef4444'],
+            borderColor: ['#16a34a', '#b91c1c'],
+            borderWidth: 1.5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins:{
+            legend:{ display:true, labels:{ color:'#cbd5e1', font:{ weight:600 } } },
+            tooltip:{
+              backgroundColor:'rgba(2,6,23,0.95)',
+              titleColor:'#e5e7eb', bodyColor:'#cbd5e1',
+              borderColor:'rgba(148,163,184,0.25)', borderWidth:1,
+              callbacks:{
+                label: (ctx) => {
+                  const totalLocal = victories + loses;
+                  const val = ctx.parsed;
+                  const pct = totalLocal ? ((val/totalLocal)*100).toFixed(1) : 0;
+                  return ` ${ctx.label}: ${val} (${pct}%)`;
+                }
+              }
+            }
+          },
+          layout:{ padding: 8 }
+        },
+        plugins: [totalBoxPlugin]
+      });
+
+      state.style.display='none';
+      canvas.style.display='block';
+    }
+  </script>
+</body>
+</html>
