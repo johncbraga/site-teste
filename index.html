@@ -399,12 +399,12 @@
   <div class="controls">
     <select id="regionFilter" title="Região">
       <option value="Global">Global</option>
-      <option value="EU">Europa</option>
+      <option value="EU">Europe</option>
       <option value="AS/SIS/ESEA">Asia</option>
-      <option value="AM">Americas</option>
+      <option value="AM">America</option>
     </select>
 
-    <input class="input" type="text" id="teamSearch" placeholder="Buscar time (digite para filtrar)">
+    <input class="input" type="text" id="teamSearch" placeholder="Search team (type to filter)">
 
     <select id="metric" title="Métrica">
       <option value="Points">Points</option>
@@ -418,8 +418,8 @@
     </select>
 
     <select id="sortOrder" title="Ordem">
-      <option value="desc">Maior → Menor</option>
-      <option value="asc">Menor → Maior</option>
+      <option value="desc">Highest → Lowest</option>
+      <option value="asc">Lowest → Highest</option>
     </select>
   </div>
 
@@ -433,20 +433,20 @@
     ======================== -->
     <div class="card">
       <div class="card-header">
-        <h3>Comparação entre Regiões</h3>
-        <div style="color:var(--muted);font-size:12px">média por métrica</div>
+        <h3>Regions</h3>
+        <div style="color:var(--muted);font-size:12px">media by metric</div>
       </div>
       <div id="regionChartWrap">
-        <div class="state" id="regionChartState"><span class="spinner"></span>Carregando…</div>
+        <div class="state" id="regionChartState"><span class="spinner"></span>Loading…</div>
         <canvas id="regionChart" style="display:none"></canvas>
       </div>
 
       <div class="card-header" style="margin-top:14px">
-        <h3>Tabela Geral</h3>
+        <h3>General Table</h3>
         <div style="color:var(--muted);font-size:12px">ordenada pela métrica</div>
       </div>
       <div class="table-container" id="dataTableWrap">
-        <div class="state" id="dataTableState">Carregue um arquivo Excel para visualizar os dados.</div>
+        <div class="state" id="dataTableState">Load an Excel file to see the data.</div>
         <table id="dataTable" class="table-bordered" style="display:none"></table>
       </div>
     </div>
@@ -456,13 +456,13 @@
     ======================== -->
     <div class="card">
       <div class="card-header">
-        <h3>Top 10 Times</h3>
-        <div style="color:var(--muted);font-size:12px">com base na métrica selecionada</div>
+        <h3>Top Teams</h3>
+        <div style="color:var(--muted);font-size:12px">based on selected metric</div>
       </div>
 
       <!-- Top 10 normal -->
       <div id="topChartWrap">
-        <div class="state" id="topChartState"><span class="spinner"></span>Carregando…</div>
+        <div class="state" id="topChartState"><span class="spinner"></span>Loading…</div>
         <canvas id="topChart" style="display:none"></canvas>
       </div>
 
@@ -470,7 +470,7 @@
       <div class="top10-bottom">
         <div class="mini-card" id="teamPieCard" style="height:100%">
           <div class="card-header" style="margin-bottom:8px; padding-bottom:6px">
-            <h3 style="margin:0;font-size:14px">Vitórias x Derrotas — Por Time</h3>
+            <h3 style="margin:0;font-size:14px">Wins x Loses — By Team</h3>
             <div class="hstack" style="margin-left:auto; gap:8px">
               <label for="teamPieSelect" style="color:var(--muted);font-size:12px">Time</label>
               <select id="teamPieSelect" title="Time para pizza" style="min-width:180px"></select>
@@ -478,7 +478,7 @@
           </div>
 
           <div id="teamPieWrap">
-            <div class="state" id="teamPieState"><span class="spinner"></span>Carregando…</div>
+            <div class="state" id="teamPieState"><span class="spinner"></span>Loading…</div>
             <canvas id="teamPieChart" style="display:none;"></canvas>
           </div>
         </div>
@@ -490,52 +490,52 @@
     ============================================ -->
     <div class="card" style="grid-column:1 / -1">
       <div class="card-header">
-        <h3>Gráficos Fixos por Região Selecionada</h3>
+        <h3>Graph per Region</h3>
         <div style="color:var(--muted);font-size:12px">ignoram a busca e demais filtros</div>
       </div>
 
       <div class="mini-grid">
         <!-- Streak -->
         <div class="mini-card">
-          <h4>Streak — Top 10 (apenas região)</h4>
+          <h4>Streak — Top 10 (per region)</h4>
           <div id="streakChartWrap">
-            <div class="state" id="streakChartState"><span class="spinner"></span>Carregando…</div>
+            <div class="state" id="streakChartState"><span class="spinner"></span>Loading…</div>
             <canvas id="streakChart" style="display:none"></canvas>
           </div>
         </div>
 
         <!-- Victories -->
         <div class="mini-card">
-          <h4>Victories — Top 10 (apenas região)</h4>
+          <h4>Victories — Top 10 (per region)</h4>
           <div id="victoriesChartWrap">
-            <div class="state" id="victoriesChartState"><span class="spinner"></span>Carregando…</div>
+            <div class="state" id="victoriesChartState"><span class="spinner"></span>Loading…</div>
             <canvas id="victoriesChart" style="display:none"></canvas>
           </div>
         </div>
 
         <!-- Prestige (antes Points) -->
         <div class="mini-card">
-          <h4>Prestige — Top 10 (apenas região)</h4>
+          <h4>Prestige — Top 10 (per region)</h4>
           <div id="pointsChartWrap">
-            <div class="state" id="pointsChartState"><span class="spinner"></span>Carregando…</div>
+            <div class="state" id="pointsChartState"><span class="spinner"></span>Loading…</div>
             <canvas id="pointsChart" style="display:none"></canvas>
           </div>
         </div>
 
         <!-- Majors AGORA no lugar onde ficava o Points -->
         <div class="mini-card">
-          <h4>Comparação (Linha) — Majors por Time (apenas região)</h4>
+          <h4>Comparison — Majors by Team (per region)</h4>
           <div id="majorsChartWrap">
-            <div class="state" id="majorsChartState"><span class="spinner"></span>Carregando…</div>
+            <div class="state" id="majorsChartState"><span class="spinner"></span>Loading…</div>
             <canvas id="majorsChart" style="display:none"></canvas>
           </div>
         </div>
 
         <!-- Points AGORA ocupa a linha inteira -->
         <div class="mini-card" style="grid-column:1 / -1">
-          <h4>Comparação (Linha) — Points por Time (apenas região)</h4>
+          <h4>Comparison — Points by Team (per region)</h4>
           <div id="comparisonChartWrap">
-            <div class="state" id="comparisonChartState"><span class="spinner"></span>Carregando…</div>
+            <div class="state" id="comparisonChartState"><span class="spinner"></span>Loading…</div>
             <canvas id="comparisonChart" style="display:none"></canvas>
           </div>
         </div>
@@ -547,7 +547,7 @@
     ======================== -->
     <div class="card" style="grid-column:1 / -1">
       <div class="card-header">
-        <h3>Legends Ranking (501+ Points)</h3>
+        <h3>Legends Elo Ranking (501+ Points)</h3>
         <select id="legendsRegionFilter" title="Região Legends">
           <option value="Global">Global</option>
           <option value="AM">Americas</option>
@@ -556,7 +556,7 @@
         </select>
       </div>
       <div class="table-container" id="legendsTableWrap">
-        <div class="state" id="legendsTableState">Carregue um arquivo para ver o ranking de Legends.</div>
+        <div class="state" id="legendsTableState">Load a file to see the Legend's Ranking.</div>
         <table id="legendsTable" class="table-bordered" style="display:none"></table>
       </div>
     </div>
@@ -687,7 +687,7 @@
     function update(){
       if(!headers.length || !rows.length){
         setLoading(false);
-        setError("Carregue um arquivo Excel para visualizar os dados.");
+        setError("Load an Excel file to see the data.");
         return;
       }
 
@@ -1141,7 +1141,7 @@
       const current = select.value;
 
       if(select.options.length !== teams.length + 1){
-        select.innerHTML = `<option value="">Selecione um time…</option>` + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+        select.innerHTML = `<option value="">Choose a team…</option>` + teams.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
       }
 
       if(current && teams.includes(current)){
@@ -1171,7 +1171,7 @@
 
       const team = select.value;
       if(!team){
-        state.innerHTML = "Selecione um time para visualizar.";
+        state.innerHTML = "Choose a team to show.";
         state.style.display='flex';
         canvas.style.display='none';
         return;
